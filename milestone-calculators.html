@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Milestone – Clinical Risk Calculators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: #F8F2EE;
+      color: #2E1A20;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: #2E1A20;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: #F0E8E2;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .header-divider {
+      width: 0.5px;
+      height: 42px;
+      background: rgba(255,255,255,0.18);
+      flex-shrink: 0;
+    }
+    .header-tagline strong {
+      display: block;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #F0E8E2;
+      margin-bottom: 3px;
+    }
+    .header-tagline span {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #C9A08A;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex;
+      background: #F8F2EE;
+      border-bottom: 1px solid #E5D5CB;
+      padding: 0 28px;
+    }
+    .nav-btn {
+      font-family: 'Jost', sans-serif;
+      font-size: 11.5px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8A6858;
+      padding: 13px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-btn:hover { color: #2E1A20; }
+    .nav-btn.active { color: #2E1A20; border-bottom-color: #B07255; font-weight: 500; }
+
+    /* ── PANELS ── */
+    .panel { display: none; padding: 28px 32px; max-width: 860px; }
+    .panel.active { display: block; }
+
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #B07255;
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    /* ── CARDS ── */
+    .calc-card {
+      background: #FDFAF8;
+      border: 0.5px solid #E5D5CB;
+      border-radius: 10px;
+      padding: 24px 26px;
+      margin-bottom: 18px;
+    }
+    .calc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: #2E1A20;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+    .calc-desc {
+      font-size: 13px;
+      color: #8A6858;
+      margin-bottom: 22px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      font-size: 10.5px;
+      color: #8A6858;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .field input, .field select {
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      padding: 9px 12px;
+      border: 0.5px solid #CEBDB3;
+      border-radius: 6px;
+      background: white;
+      color: #2E1A20;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .field input:focus, .field select:focus { border-color: #B07255; }
+
+    .toggle-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+    .toggle-btn {
+      font-family: 'Jost', sans-serif;
+      font-size: 12.5px;
+      letter-spacing: 0.04em;
+      padding: 7px 16px;
+      border: 0.5px solid #CEBDB3;
+      border-radius: 20px;
+      background: white;
+      color: #8A6858;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-btn.active { background: #2E1A20; border-color: #2E1A20; color: white; }
+    .toggle-btn:hover:not(.active) { border-color: #B07255; color: #2E1A20; }
+
+    .calc-btn {
+      font-family: 'Jost', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 11px 26px;
+      background: #2E1A20;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .calc-btn:hover { background: #4A2530; }
+
+    /* ── RESULTS ── */
+    .result-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: #F0E8E3;
+      border-radius: 8px;
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .result-risk {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: #2E1A20;
+      letter-spacing: 0.01em;
+    }
+    .result-category {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 8px 0 12px;
+    }
+    .cat-low  { background: #C0DD97; color: #27500A; }
+    .cat-mod  { background: #FAC775; color: #633806; }
+    .cat-high { background: #F09595; color: #791F1F; }
+    .cat-vhigh { background: #E24B4A; color: white; }
+
+    .result-detail {
+      font-size: 13px;
+      color: #6B4E42;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+    .result-heart-age {
+      font-size: 13.5px;
+      color: #4A2530;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+    .divider { height: 0.5px; background: #CEBDB3; margin: 16px 0; }
+
+    .risk-bar-wrap {
+      margin-top: 12px;
+      height: 6px;
+      background: #CEBDB3;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .risk-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: #B07255;
+      transition: width 0.6s ease;
+    }
+
+    /* ── LP(a) SPECIFIC ── */
+    .lpa-threshold-row {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+    .threshold-pill {
+      font-size: 11px;
+      padding: 4px 11px;
+      border-radius: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .t-normal { background: #C0DD97; color: #27500A; }
+    .t-border { background: #FAC775; color: #633806; }
+    .t-high   { background: #F09595; color: #791F1F; }
+    .t-vhigh  { background: #E24B4A; color: white; }
+
+    .lpa-result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .lpa-stat {
+      background: white;
+      border: 0.5px solid #E5D5CB;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .lpa-stat-label {
+      font-size: 10px;
+      color: #8A6858;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+    }
+    .lpa-stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      color: #2E1A20;
+    }
+    .lpa-stat-sub {
+      font-size: 11.5px;
+      color: #8A6858;
+      margin-top: 2px;
+      font-weight: 300;
+    }
+
+    .risk-modifier-bar { margin: 16px 0 6px; }
+    .bar-label {
+      font-size: 11px;
+      color: #8A6858;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .bar-track {
+      height: 8px;
+      background: #E5D5CB;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-baseline {
+      height: 100%;
+      background: #B07255;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+    .bar-lpa {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      background: #E24B4A;
+      border-radius: 4px;
+      transition: width 0.5s, left 0.5s;
+    }
+
+    .action-box {
+      margin-top: 14px;
+      background: white;
+      border: 0.5px solid #E5D5CB;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .action-title {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: #2E1A20;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .action-item {
+      font-size: 12.5px;
+      color: #6B4E42;
+      line-height: 1.75;
+      padding-left: 12px;
+      border-left: 2px solid #B07255;
+      margin-bottom: 8px;
+      font-weight: 300;
+    }
+
+    /* ── EXTERNAL LINKS ── */
+    .link-card {
+      background: #FDFAF8;
+      border: 0.5px solid #E5D5CB;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .link-card:hover { border-color: #B07255; background: #FDF5F0; }
+    .link-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .link-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #2E1A20;
+      margin-bottom: 4px;
+    }
+    .link-card p {
+      font-size: 12.5px;
+      color: #8A6858;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .link-arrow {
+      margin-left: auto;
+      font-size: 18px;
+      color: #B07255;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ── DISCLAIMER / INFO ── */
+    .disclaimer {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #F8F2EE;
+      border-radius: 7px;
+      border-left: 3px solid #B07255;
+    }
+    .disclaimer p {
+      font-size: 12px;
+      color: #8A6858;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+    .info-box {
+      font-size: 13px;
+      color: #8A6858;
+      line-height: 1.75;
+      background: #FDFAF8;
+      border: 0.5px solid #E5D5CB;
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-weight: 300;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #2E1A20;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .footer-text  { font-size: 11.5px; color: #C9A08A; letter-spacing: 0.04em; }
+    .footer-right { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.03em; text-align: right; }
+
+    @media (max-width: 600px) {
+      .header { padding: 14px 18px; }
+      .panel { padding: 20px 18px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .lpa-result-grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; gap: 6px; }
+      .footer-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-wordmark">Milestone</div>
+    <div class="header-divider"></div>
+    <div class="header-tagline">
+      <strong>Clinical Risk Calculators</strong>
+      <span>Evidence-based. Always.</span>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('framingham', this)">Framingham CVD Risk</button>
+    <button class="nav-btn" onclick="showTab('lpa', this)">Lp(a) Risk</button>
+    <button class="nav-btn" onclick="showTab('external', this)">External Tools</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FRAMINGHAM TAB
+  ══════════════════════════════════════ -->
+  <div id="tab-framingham" class="panel active">
+    <p class="section-label">10-year cardiovascular disease risk</p>
+
+    <div class="calc-card">
+      <div class="calc-title">Framingham CVD Risk Score</div>
+      <div class="calc-desc">
+        Estimates 10-year risk of cardiovascular events including coronary death, MI, stroke, and heart failure.
+        Based on the D'Agostino et al. 2008 general CVD risk model — validated for Canadian populations
+        and referenced by CCS dyslipidemia guidelines. Cholesterol values in mmol/L.
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:10.5px;color:#8A6858;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:8px;">Sex assigned at birth</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btn-female" onclick="setSex('F')">Female</button>
+          <button class="toggle-btn" id="btn-male" onclick="setSex('M')">Male</button>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label>Age (years)</label>
+          <input type="number" id="age" min="30" max="74" placeholder="30 – 74" />
+        </div>
+        <div class="field">
+          <label>Total cholesterol (mmol/L)</label>
+          <input type="number" id="totchol" step="0.1" placeholder="e.g. 5.2" />
+        </div>
+        <div class="field">
+          <label>HDL cholesterol (mmol/L)</label>
+          <input type="number" id="hdl" step="0.1" placeholder="e.g. 1.4" />
+        </div>
+        <div class="field">
+          <label>Systolic BP (mmHg)</label>
+          <input type="number" id="sbp" placeholder="e.g. 120" />
+        </div>
+        <div class="field">
+          <label>BP treatment?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-bpno" onclick="setBP(false)">No</button>
+            <button class="toggle-btn" id="btn-bpyes" onclick="setBP(true)">Yes</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Current smoker?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-smokeno" onclick="setSmoke(false)">No</button>
+            <button class="toggle-btn" id="btn-smokeyes" onclick="setSmoke(true)">Yes</button>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Diabetes?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-diabno" onclick="setDiab(false)">No</button>
+            <button class="toggle-btn" id="btn-diabyes" onclick="setDiab(true)">Yes</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcFramingham()">Calculate risk</button>
+
+      <div class="result-box" id="frs-result">
+        <div class="result-risk" id="frs-pct">—</div>
+        <div><span class="result-category" id="frs-cat"></span></div>
+        <div class="risk-bar-wrap">
+          <div class="risk-bar-fill" id="frs-bar" style="width:0%;"></div>
+        </div>
+        <div class="result-heart-age" id="frs-heartage"></div>
+        <div class="divider"></div>
+        <div class="result-detail" id="frs-detail"></div>
+      </div>
+
+      <div class="disclaimer" style="margin-top:20px;">
+        <p>
+          Risk categories per CCS guidelines: <strong>Low</strong> &lt;10% &nbsp;·&nbsp;
+          <strong>Moderate</strong> 10–19% &nbsp;·&nbsp; <strong>High</strong> ≥20%.
+          Consider doubling FRS if positive family history of premature CAD
+          (1st-degree male &lt;55, female &lt;65).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       LP(a) TAB
+  ══════════════════════════════════════ -->
+  <div id="tab-lpa" class="panel">
+    <p class="section-label">Lipoprotein(a) cardiovascular risk interpreter</p>
+
+    <div class="calc-card">
+      <div class="calc-title">Lp(a) Risk Assessment</div>
+      <div class="calc-desc">
+        Lp(a) is an independent, primarily genetic cardiovascular risk factor not captured by the Framingham score.
+        Elevated levels affect approximately 20% of the population and increase risk of MI, stroke, and aortic
+        stenosis — particularly relevant post-menopause, when Lp(a) may rise. A single lifetime measurement
+        is sufficient as levels are ~90% genetically determined and stable.
+      </div>
+
+      <div class="lpa-threshold-row">
+        <span class="threshold-pill t-normal">Normal: &lt;75 nmol/L &nbsp;/&nbsp; &lt;30 mg/dL</span>
+        <span class="threshold-pill t-border">Borderline: 75–124 nmol/L</span>
+        <span class="threshold-pill t-high">High: 125–199 nmol/L &nbsp;/&nbsp; ≥50 mg/dL</span>
+        <span class="threshold-pill t-vhigh">Very high: ≥200 nmol/L</span>
+      </div>
+
+      <div class="field-grid" style="margin-top:20px;">
+        <div class="field">
+          <label>Lp(a) level</label>
+          <input type="number" id="lpa-val" placeholder="Enter value" min="0" />
+        </div>
+        <div class="field">
+          <label>Units</label>
+          <select id="lpa-unit">
+            <option value="nmol">nmol/L</option>
+            <option value="mg">mg/dL</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Patient age</label>
+          <input type="number" id="lpa-age" placeholder="Years" min="18" max="90" />
+        </div>
+        <div class="field">
+          <label>Menopausal status</label>
+          <select id="lpa-meno">
+            <option value="pre">Pre-menopausal</option>
+            <option value="peri">Peri-menopausal</option>
+            <option value="post">Post-menopausal</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Prior cardiovascular event? (MI, stroke, PCI)</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-cvdno" onclick="setCVD(false)">No — primary prevention</button>
+            <button class="toggle-btn" id="btn-cvdyes" onclick="setCVD(true)">Yes — secondary prevention</button>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Framingham risk category (optional — contextualises Lp(a) impact)</label>
+          <select id="lpa-frs">
+            <option value="unknown">Not calculated</option>
+            <option value="low">Low (&lt;10%)</option>
+            <option value="mod">Moderate (10–19%)</option>
+            <option value="high">High (≥20%)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcLpa()">Interpret Lp(a)</button>
+
+      <div class="result-box" id="lpa-result">
+        <div class="result-risk" id="lpa-display">—</div>
+        <div><span class="result-category" id="lpa-cat"></span></div>
+
+        <div class="lpa-result-grid">
+          <div class="lpa-stat">
+            <div class="lpa-stat-label">Relative risk increase</div>
+            <div class="lpa-stat-value" id="lpa-rr">—</div>
+            <div class="lpa-stat-sub">vs. Lp(a) &lt;75 nmol/L</div>
+          </div>
+          <div class="lpa-stat">
+            <div class="lpa-stat-label">Risk reclassification</div>
+            <div class="lpa-stat-value" id="lpa-reclass">—</div>
+            <div class="lpa-stat-sub" id="lpa-reclass-sub">—</div>
+          </div>
+        </div>
+
+        <div class="risk-modifier-bar">
+          <div class="bar-label">
+            <span>Baseline CVD risk</span>
+            <span>Lp(a)-adjusted risk</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-baseline" id="lpa-bar-base" style="width:30%;"></div>
+            <div class="bar-lpa" id="lpa-bar-lpa" style="width:0%;left:30%;"></div>
+          </div>
+          <div style="font-size:11px;color:#8A6858;margin-top:5px;">Additional Lp(a)-attributable risk shown in red</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="action-box">
+          <div class="action-title">Clinical considerations</div>
+          <div id="lpa-actions"></div>
+        </div>
+
+        <div class="disclaimer" style="margin-top:14px;">
+          <p id="lpa-meno-note"></p>
+        </div>
+      </div>
+
+      <div class="disclaimer" style="margin-top:20px;">
+        <p>
+          Risk estimates based on Mendelian randomization data (Björnson et al., UK Biobank, n=502,413):
+          OR 1.28 per 50 nmol/L Lp(a). EAS / ACC / AHA thresholds applied.
+          This tool is a clinical reference aid, not a diagnostic instrument.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       EXTERNAL TOOLS TAB
+  ══════════════════════════════════════ -->
+  <div id="tab-external" class="panel">
+    <p class="section-label">Linked clinical tools</p>
+
+    <a class="link-card" href="https://www.fraxplus.org/calculation-tool" target="_blank" rel="noopener">
+      <div class="link-icon" style="background:#EAF3DE;">🦴</div>
+      <div>
+        <h3>FRAX — Bone Fracture Risk</h3>
+        <p>
+          WHO tool estimating 10-year probability of osteoporotic fracture using clinical risk factors,
+          with or without BMD. Uses country-specific tables maintained by the University of Sheffield —
+          proprietary model, best used via the official tool.
+        </p>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <a class="link-card" href="https://magview.com/ibis-risk-calculator/" target="_blank" rel="noopener">
+      <div class="link-icon" style="background:#FBEAF0;">🎗️</div>
+      <div>
+        <h3>Tyrer-Cuzick — Breast Cancer Risk</h3>
+        <p>
+          Estimates lifetime and 10-year breast cancer risk using personal history, family history,
+          hormonal factors, and genetic markers. Proprietary algorithm — validated results via the
+          official IBIS tool only.
+        </p>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <div class="disclaimer">
+      <p>
+        FRAX and Tyrer-Cuzick use proprietary, country-specific models that cannot be reliably reproduced
+        independently. They are linked rather than built in to ensure you are always using the validated,
+        up-to-date versions maintained by their respective organisations.
+      </p>
+    </div>
+
+    <div class="divider" style="margin:24px 0;"></div>
+    <p class="section-label">Why do different Framingham tools give different numbers?</p>
+    <div class="info-box">
+      Different sites produce slightly different scores because they use different algorithm versions —
+      the 2008 lipid model, the BMI-based model, or older point-scoring tables — and different unit
+      conversions. The built-in calculator here uses the <strong>2008 D'Agostino general CVD risk
+      model</strong>, the version validated for Canadian populations and referenced by CCS dyslipidemia
+      guidelines.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">Milestone – Menopause Centre of Southern Alberta &nbsp;·&nbsp; For internal clinical use only</div>
+    <div class="footer-right">
+      Glendeer Professional Building, #160 1035 64 Ave SE, Calgary T2H 2J7<br/>
+      587-582-6586
+    </div>
+  </div>
+
+  <script>
+    // ── STATE ──
+    let sex = 'F', bpTreated = false, smoker = false, diabetic = false, priorCVD = false;
+
+    // ── NAVIGATION ──
+    function showTab(tab, btn) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── TOGGLE HELPERS ──
+    function setSex(s) {
+      sex = s;
+      document.getElementById('btn-female').classList.toggle('active', s === 'F');
+      document.getElementById('btn-male').classList.toggle('active', s === 'M');
+    }
+    function setBP(v) {
+      bpTreated = v;
+      document.getElementById('btn-bpno').classList.toggle('active', !v);
+      document.getElementById('btn-bpyes').classList.toggle('active', v);
+    }
+    function setSmoke(v) {
+      smoker = v;
+      document.getElementById('btn-smokeno').classList.toggle('active', !v);
+      document.getElementById('btn-smokeyes').classList.toggle('active', v);
+    }
+    function setDiab(v) {
+      diabetic = v;
+      document.getElementById('btn-diabno').classList.toggle('active', !v);
+      document.getElementById('btn-diabyes').classList.toggle('active', v);
+    }
+    function setCVD(v) {
+      priorCVD = v;
+      document.getElementById('btn-cvdno').classList.toggle('active', !v);
+      document.getElementById('btn-cvdyes').classList.toggle('active', v);
+    }
+
+    // ── FRAMINGHAM CALCULATOR ──
+    // Source: D'Agostino RB et al. Circulation. 2008;117:743-53
+    // Validated for Canadian populations per CCS dyslipidemia guidelines
+    function calcFramingham() {
+      const age = parseFloat(document.getElementById('age').value);
+      const tc  = parseFloat(document.getElementById('totchol').value);
+      const hdl = parseFloat(document.getElementById('hdl').value);
+      const sbp = parseFloat(document.getElementById('sbp').value);
+
+      if (isNaN(age) || isNaN(tc) || isNaN(hdl) || isNaN(sbp)) {
+        alert('Please fill in all four numeric fields (age, total cholesterol, HDL, systolic BP).');
+        return;
+      }
+      if (age < 30 || age > 74) {
+        alert('This calculator is validated for patients aged 30–74.');
+        return;
+      }
+
+      const lnAge = Math.log(age);
+      const lnTC  = Math.log(tc);
+      const lnHDL = Math.log(hdl);
+      const lnSBP = Math.log(sbp);
+      const smokVal = smoker   ? 1 : 0;
+      const diabVal = diabetic ? 1 : 0;
+
+      let sum, s0, mean;
+
+      if (sex === 'F') {
+        sum  = 2.32888 * lnAge
+             + 1.20904 * lnTC
+             - 0.70833 * lnHDL
+             + (bpTreated ? 2.82263 : 2.76157) * lnSBP
+             + 0.52873 * smokVal
+             + 0.69154 * diabVal;
+        s0   = 0.95012;
+        mean = 26.1931;
+      } else {
+        sum  = 3.06117 * lnAge
+             + 1.12370 * lnTC
+             - 0.93263 * lnHDL
+             + (bpTreated ? 1.99881 : 1.93303) * lnSBP
+             + 0.65451 * smokVal
+             + 0.57367 * diabVal;
+        s0   = 0.88936;
+        mean = 23.9802;
+      }
+
+      const risk10  = Math.max(0.5, (1 - Math.pow(s0, Math.exp(sum - mean))) * 100);
+      const display = risk10 < 1 ? risk10.toFixed(1) : Math.round(risk10);
+
+      let cat, catClass, detail;
+      if (risk10 < 10) {
+        cat = 'Low risk'; catClass = 'cat-low';
+        detail = 'Lifestyle counselling and periodic reassessment are appropriate. Pharmacotherapy generally not indicated based on risk alone.';
+      } else if (risk10 < 20) {
+        cat = 'Moderate risk'; catClass = 'cat-mod';
+        detail = 'Consider LDL target &lt;2.0 mmol/L. Shared decision-making for statin therapy. Evaluate for metabolic syndrome modifiers (×1.5 if present).';
+      } else {
+        cat = 'High risk'; catClass = 'cat-high';
+        detail = 'LDL target &lt;2.0 mmol/L (or 50% reduction). Statin therapy strongly recommended. Consider Lp(a) testing and additional risk modifiers.';
+      }
+
+      const heartAge = Math.round(age + (risk10 < 10 ? -2 : risk10 < 20 ? 2 : 5));
+
+      document.getElementById('frs-pct').textContent = display + '% 10-year CVD risk';
+      const catEl = document.getElementById('frs-cat');
+      catEl.textContent = cat;
+      catEl.className = 'result-category ' + catClass;
+      document.getElementById('frs-bar').style.width = Math.min(100, risk10 / 30 * 100).toFixed(1) + '%';
+      document.getElementById('frs-heartage').textContent = 'Estimated vascular age: ' + heartAge + ' years';
+      document.getElementById('frs-detail').innerHTML = detail;
+      document.getElementById('frs-result').classList.add('visible');
+    }
+
+    // ── LP(a) INTERPRETER ──
+    // Risk model: OR 1.28 per 50 nmol/L (Björnson et al., UK Biobank n=502,413)
+    // Thresholds: EAS 2022 consensus / ACC-AHA guidelines
+    function calcLpa() {
+      const val  = parseFloat(document.getElementById('lpa-val').value);
+      const unit = document.getElementById('lpa-unit').value;
+      const meno = document.getElementById('lpa-meno').value;
+      const frs  = document.getElementById('lpa-frs').value;
+
+      if (isNaN(val) || val < 0) {
+        alert('Please enter a valid Lp(a) level.');
+        return;
+      }
+
+      const nmol = unit === 'mg' ? val * 2.5 : val;
+      const mgdl = unit === 'mg' ? val : val / 2.5;
+
+      let cat, catClass, catLabel;
+      if      (nmol < 75)  { cat = 'normal'; catClass = 'cat-low';  catLabel = 'Normal — low risk'; }
+      else if (nmol < 125) { cat = 'border'; catClass = 'cat-mod';  catLabel = 'Borderline elevated'; }
+      else if (nmol < 200) { cat = 'high';   catClass = 'cat-high'; catLabel = 'High — risk modifier'; }
+      else                 { cat = 'vhigh';  catClass = 'cat-vhigh'; catLabel = 'Very high — significant risk'; }
+
+      const excessNmol   = Math.max(0, nmol - 75);
+      const rrMultiplier = Math.pow(1.28, excessNmol / 50);
+      const rrDisplay    = nmol < 75 ? '—' : '+' + Math.round((rrMultiplier - 1) * 100) + '%';
+
+      let reclassText, reclassSubText;
+      if      (frs === 'unknown')                               { reclassText = 'N/A';           reclassSubText = 'Enter Framingham score to compare'; }
+      else if (frs === 'low'  && cat === 'normal')              { reclassText = 'No change';      reclassSubText = 'Remains low risk'; }
+      else if (frs === 'low'  && (cat === 'border' || cat === 'high')) { reclassText = 'Upward'; reclassSubText = 'Consider reclassifying to moderate'; }
+      else if (frs === 'low'  && cat === 'vhigh')               { reclassText = 'Upward';         reclassSubText = 'Consider reclassifying to high'; }
+      else if (frs === 'mod'  && cat === 'normal')              { reclassText = 'No change';      reclassSubText = 'Remains moderate risk'; }
+      else if (frs === 'mod'  && (cat === 'high' || cat === 'vhigh')) { reclassText = 'Upward';  reclassSubText = 'Consider reclassifying to high'; }
+      else if (frs === 'high')                                  { reclassText = 'Already high';   reclassSubText = 'Lp(a) reinforces treatment intensity'; }
+      else                                                      { reclassText = 'No change';      reclassSubText = 'Risk category unaffected'; }
+
+      const basePercent = frs === 'low' ? 15 : frs === 'mod' ? 35 : frs === 'high' ? 60 : 25;
+      const lpaAddPct   = Math.min(40, Math.round((rrMultiplier - 1) * basePercent));
+
+      let actions = [];
+      if (priorCVD) actions.push('Secondary prevention: Lp(a) further elevates already high residual risk despite statin therapy.');
+      if (cat === 'normal') actions.push('Routine monitoring — no specific Lp(a)-driven intervention indicated at this level.');
+      if (cat === 'border') actions.push('Repeat testing not required (Lp(a) is genetically stable). Focus on optimising modifiable risk factors.');
+      if (cat === 'high' || cat === 'vhigh') {
+        actions.push('Cascade family testing recommended — Lp(a) elevation is ~90% heritable.');
+        actions.push('Optimise all modifiable risk factors aggressively. Statins do not lower Lp(a) and may slightly raise it.');
+        actions.push('Niacin can reduce Lp(a) 15–25%. PCSK9 inhibitors reduce Lp(a) ~20–30% as a secondary effect.');
+        if (cat === 'vhigh') actions.push('Lp(a) apheresis may be considered in very high-risk patients with recurrent events despite optimal therapy.');
+      }
+      if (meno === 'post' || meno === 'peri') actions.push('Post-menopausal rise in Lp(a) is well-documented. Re-check if pre-menopausal baseline is unknown.');
+
+      const menoNote = meno === 'post'
+        ? 'Post-menopausal women may have Lp(a) levels 10–15% higher than pre-menopause. Oral oestrogen (HRT) has been shown to lower Lp(a) — a clinically relevant consideration for this centre.'
+        : meno === 'peri'
+        ? 'Lp(a) may be in transition during perimenopause. If a prior reading exists, comparison is clinically useful.'
+        : 'Pre-menopausal baseline noted. Lp(a) levels are expected to be stable but may rise with the menopause transition.';
+
+      document.getElementById('lpa-display').textContent  = Math.round(nmol) + ' nmol/L  (~' + Math.round(mgdl) + ' mg/dL)';
+      const catEl = document.getElementById('lpa-cat');
+      catEl.textContent = catLabel;
+      catEl.className   = 'result-category ' + catClass;
+      document.getElementById('lpa-rr').textContent          = rrDisplay;
+      document.getElementById('lpa-reclass').textContent     = reclassText;
+      document.getElementById('lpa-reclass-sub').textContent = reclassSubText;
+      document.getElementById('lpa-bar-base').style.width    = basePercent + '%';
+      document.getElementById('lpa-bar-lpa').style.width     = lpaAddPct + '%';
+      document.getElementById('lpa-bar-lpa').style.left      = basePercent + '%';
+      document.getElementById('lpa-actions').innerHTML       = actions.map(a => `<div class="action-item">${a}</div>`).join('');
+      document.getElementById('lpa-meno-note').textContent   = menoNote;
+      document.getElementById('lpa-result').classList.add('visible');
+    }
+  </script>
+
+</body>
+</html>
